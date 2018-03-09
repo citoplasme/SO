@@ -104,7 +104,7 @@ void ex5 () {
 void ex6 () {
 
     int num,i,j,z;
-    int lines = rand() % 100, col = rand() % 1000;
+    int lines = rand() % 100, col = rand() % 100000;
     int pid[lines];
     int matriz[lines][col];
 

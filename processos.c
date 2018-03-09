@@ -56,18 +56,23 @@ void ex3 () {
     } 
 }
 
-void ex4 () {
-	 pid_t  pid;
-     int    i;
-
-     for (i = 1; i <= MAX_COUNT; i++) {
-          pid = fork();
-          if (!pid) {
-          		printf("Filho %d ID %d Pai %d \n",i, getpid(), getppid());
-          		_exit(1);	
-          }
+void ex4() {
+  pid_t pids[MAX_COUNT];
+  for (int i = 0; i < MAX_COUNT; ++i) {
+    pid_t pid = fork();
+    pids[i] = pid;
+    if (!pid) {
+      _exit(i+1);
     }
+  } 
+  for (int i = 0; i < MAX_COUNT; ++i) {
+    int status;
+    pid_t p = waitpid(pids[i],&status,0);
+    if (WIFEXITED(status))
+      printf("Filho %d com pid %d terminou com exit de %d\n",i,p, WIFEXITED(status));
+  }
 }
+
 // gerar filhos de filhos
 void child(int i) {
     int pid;

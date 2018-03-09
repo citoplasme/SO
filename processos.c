@@ -110,7 +110,7 @@ void ex6 () {
 
     srand((unsigned)time(NULL)); //random seed
 
-    num = rand() % 10;
+    num = rand() % 100;
 
     for(i = 0; i < lines; i++) {
         //printf("\n");

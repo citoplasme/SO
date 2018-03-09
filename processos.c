@@ -100,6 +100,46 @@ void ex5 () {
         waitpid(pid, NULL, 0);
 }
 
+void ex6 () {
+
+    int num,i,j,z;
+    int lines = rand() % 100, col = rand() % 1000;
+    int pid[lines];
+    int matriz[lines][col];
+
+    srand((unsigned)time(NULL)); //random seed
+
+    num = rand() % 10;
+
+    for(i = 0; i < lines; i++) {
+        //printf("\n");
+        for(j = 0; j < col; j++) {
+            matriz[i][j] = rand() % 1000; //matrix with randoms from 1-50
+            printf("%i  ",matriz[i][j]);
+        }
+    }
+
+    printf("\n *** Search Results: *** \n");
+
+    //create paralell process to search matrix
+    for(i = 0; i < lines; i++) {
+        pid[i] = fork();
+        if (pid[i] == 0) {
+            for(z = 0; z < col; z++) {
+                if (matriz[i][z] == num) { 
+                  printf("Found %d in position (%d , %d)\n",num,i,z); 
+                }
+            }
+        _exit(0);
+        }       
+    }
+
+    for(i=0;i<lines;i++) {
+        wait(NULL);
+    }
+}
+
+
 
 int main () {
 	//ex1();

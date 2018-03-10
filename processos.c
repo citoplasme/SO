@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h> 
+#include <signal.h>
 
 void ids () {
 	int p = getppid();
@@ -63,6 +64,7 @@ void ex4() {
     pid_t pid = fork();
     pids[i] = pid;
     if (!pid) {
+      //printf("Filho %d \n",i );
       _exit(i+1);
     }
   } 
@@ -70,7 +72,7 @@ void ex4() {
     int status;
     pid_t p = waitpid(pids[i],&status,0);
     if (WIFEXITED(status))
-      printf("Filho %d com pid %d terminou com exit de %d\n",i,p, WIFEXITED(status));
+      printf("Filho %d com pid %d terminou com exit de %d => Pai %d\n",(i+1),p, WIFEXITED(status), getppid());
   }
 }
 
@@ -79,7 +81,7 @@ void child(int i) {
     int pid;
 
     printf("Child number %d, ID %d Parent %d \n", i,  getpid(), getppid());
-    if (i == 10)
+    if (i == MAX_COUNT)
         return;
     pid = fork();
     if (pid < 0)
@@ -88,8 +90,9 @@ void child(int i) {
         child(++i);
     else
         waitpid(pid, NULL, 0);
-    exit(0);
+    _exit(0);
 }
+
 void ex5 () {
     int i = 0;  
     int pid = fork();
@@ -100,8 +103,50 @@ void ex5 () {
     else
         waitpid(pid, NULL, 0);
 }
+// procura em matriz
+void killEmAll (pid_t pids[], int size) {
+  int i;
+  for (i = 0; i < size; i++) {
+    kill(pids[i], SIGUSR1); // kill all the processes and cleans them
+  }
+}
 
-void ex6 () {
+int ex6 () {
+    int result = 0;
+    int num,i,j,z;
+    int lines = rand() % 100, col = rand() % 100000;
+    int pid[lines]; // um filho por linha
+    int matriz[lines][col];
+
+    srand((unsigned)time(NULL)); 
+
+    num = rand() % 100;
+
+    for(i = 0; i < lines; i++) {
+        for(j = 0; j < col; j++) {
+            matriz[i][j] = rand() % 1000; 
+            //printf("%i  ",matriz[i][j]);
+        }
+    }
+    //create paralell processes to search in matrix
+    for(i = 0; i < lines; i++) {
+        pid[i] = fork();
+        if (pid[i] == 0) { 
+            for(z = 0; z < col; z++) {
+                if (matriz[i][z] == num) { 
+                  result = 1;
+                  printf("TRUE\n");
+                  killEmAll(pid, lines);
+                }
+            }
+        _exit(0);
+        }       
+    }
+
+    return result;
+}
+
+void ex7 () {
 
     int num,i,j,z;
     int lines = rand() % 100, col = rand() % 100000;
@@ -113,14 +158,13 @@ void ex6 () {
     num = rand() % 100;
 
     for(i = 0; i < lines; i++) {
-        //printf("\n");
         for(j = 0; j < col; j++) {
             matriz[i][j] = rand() % 1000; 
             printf("%i  ",matriz[i][j]);
         }
     }
 
-    printf("\n *** Search Results: *** \n");
+    printf("\n *** Results: *** \n");
 
     //create paralell processes to search in matrix
     for(i = 0; i < lines; i++) {
@@ -140,14 +184,16 @@ void ex6 () {
     }
 }
 
-
-
 int main () {
 	//ex1();
 	//ex2();
 	//ex3();
 	//ex4();
-	ex5();
-	_exit(0);
+	//ex5();
+  	int x = ex6();
+  	if (x == 1) printf("TRUE\n");
+  	else printf("FALSE\n");
+	//ex7();
+  	_exit(0);
 	return 0;
 }
